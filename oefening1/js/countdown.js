@@ -64,13 +64,7 @@ class MilestonesComponent {
     for (let i = 0; i < this._milestones.length; i++) {
       const milestone = this._milestones[i];
       if (new Date(milestone.date) < new Date()) {
-        console.log(
-          'Milestone ' +
-            milestone.name +
-            ' at ' +
-            milestone.date +
-            ' was removed'
-        );
+        console.log(`Milestone ${milestone.name} at ${milestone.date} was removed`);
         this.deleteMilestone(i);
       } else {
         const oneDay = 24 * 60 * 60 * 1000;
