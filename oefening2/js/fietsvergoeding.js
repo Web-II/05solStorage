@@ -28,16 +28,14 @@ class GefietsteKilometers {
 
 class GefietsteKilometersRepository {
   constructor() {
-    this.repository = [];
+    this._repository = [];
     this.opvullen();
   }
 
   get repository() {
     return this._repository;
   }
-  set repository(value) {
-    this._repository = value;
-  }
+  
 
   geefJaren() {
     const jarenSet = this._repository.reduce((result, value, index, array) => {
@@ -158,7 +156,6 @@ function init() {
     gefietsteKilometersCompent.setJaarInStorage();
   };
   document.getElementById('opslaan').onclick = () => {
-    // kan dit korter?
     let nieuw = [];
     for (let i = 0; i < 12; i++) {
       nieuw.push(parseInt(document.getElementById(i).value));
@@ -170,6 +167,5 @@ function init() {
   };
 }
 
-window.onload = () => {
-  init();
+window.onload = init;
 };
