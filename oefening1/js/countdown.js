@@ -21,8 +21,8 @@ class Milestone {
 
 class MilestonesComponent {
   constructor(window) {
-    this.storage = window.localStorage;
-    this.milestones = [];
+    this._storage = window.localStorage;
+    this._milestones = [];
   }
 
   get storage() {
@@ -31,14 +31,6 @@ class MilestonesComponent {
 
   get milestones() {
     return this._milestones;
-  }
-
-  set storage(value) {
-    this._storage = value;
-  }
-
-  set milestones(value) {
-    this._milestones = value;
   }
 
   addMilestone(name, date) {
@@ -150,15 +142,8 @@ function init() {
   clearButton.onclick = () => {
     milestonesComponent.clearMilestones();
   };
-  window.addEventListener(
-    'storage',
-    event => {
-      stickiesComponent.storageEventHandler(event);
-    },
-    false
-  );
+  
 }
 
-window.onload = () => {
-  init();
+window.onload = init;
 };
