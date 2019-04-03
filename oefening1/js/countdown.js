@@ -3,14 +3,12 @@ class Milestone {
     this.name = name;
     this.date = date;
   }
-
   get name() {
     return this._name;
   }
   get date() {
     return this._date;
   }
-
   set name(value) {
     this._name = value;
   }
@@ -20,99 +18,76 @@ class Milestone {
 }
 
 class MilestonesComponent {
-  constructor(window) {
-    this._storage = window.localStorage;
+  constructor(storage) {
+    this._storage = storage;
     this._milestones = [];
   }
-
   get storage() {
     return this._storage;
   }
-
   get milestones() {
     return this._milestones;
   }
-
+  calculateDiffDays(d) {
+    const oneDay = 24 * 60 * 60 * 1000;
+    return Math.ceil(Math.abs((new Date().getTime() - new Date(d).getTime()) / oneDay));
+  }
   addMilestone(name, date) {
-    if (new Date(date) < new Date()) {
-      alert("This milestone is already in the past and isn't added");
-    } else {
-      const milestone = new Milestone(name, date);
-      this._milestones.push(milestone);
+    if (name === '' || name === '' || date === '' || date === null) alert("Name/Date milestone required");
+    else if (new Date(date) < new Date()) alert("This milestone is today or already in the past and isn't added");
+    else {
+      this._milestones.push(new Milestone(name, date));
       this.setMilestonesInStorage();
       this.toHTML();
     }
   }
-
-  deleteMilestone(position) {
-    this._milestones.splice(position, 1);
+  deleteMilestone(ind) {
+    this._milestones.splice(ind, 1);
     this.setMilestonesInStorage();
     this.toHTML();
   }
-
   clearMilestones() {
     this._milestones = [];
     this._storage.removeItem('milestones');
     this.toHTML();
   }
-
   toHTML() {
-    this._milestones.sort((a, b) => {
-      return new Date(a.date) - new Date(b.date);
-    });
     document.getElementById('overview').innerHTML = '';
-    for (let i = 0; i < this._milestones.length; i++) {
-      const milestone = this._milestones[i];
-      if (new Date(milestone.date) < new Date()) {
-        console.log(`Milestone ${milestone.name} at ${milestone.date} was removed`);
-        this.deleteMilestone(i);
-      } else {
-        const oneDay = 24 * 60 * 60 * 1000;
-        const diffDays = Math.round(
-          Math.abs(
-            (new Date().getTime() - new Date(milestone.date).getTime()) / oneDay
-          )
-        );
-        const li = document.createElement('li');
-        li.setAttribute('class', 'list-group-item col-sm-8');
-        li.appendChild(
-          document.createTextNode(
-            diffDays + ' days left until ' + milestone.name
-          )
-        );
-        document.getElementById('overview').appendChild(li);
-      }
-    }
+    this._milestones.map((m, ind) => {
+      const li = document.createElement('li');
+      li.setAttribute('class', 'list-group-item col-sm-8');
+      li.appendChild(
+        document.createTextNode(
+          this.calculateDiffDays(m.date) + ' days left until ' + m.name
+        )
+      )
+      const btn = document.createElement('button');
+      btn.setAttribute('class', 'btn btn-default');
+      btn.setAttribute('style', 'margin-left:20px')
+      btn.innerText = "-";
+      btn.addEventListener('click', () => {
+        this.deleteMilestone(ind)
+      });
+      li.appendChild(btn);
+      document.getElementById('overview').appendChild(li);
+    });
   }
-
   getMilestonesFromStorage() {
     this._milestones = [];
-    if (this._storage.getItem('milestones')) {
-      this._milestones = JSON.parse(this._storage.getItem('milestones')).map(
-        m => {
-          return new Milestone(m.name, m.date);
-        }
-      );
+    const mA = this._storage.getItem('milestones')
+    if (mA) {
+      this._milestones = JSON.parse(mA).map(m => new Milestone(m._name, m._date));
+      this._milestones = this._milestones.filter(m => this.calculateDiffDays(m._date) >= 0);
     }
   }
-
   setMilestonesInStorage() {
-    try {
-      this._storage.setItem('milestones', JSON.stringify(this._milestones));
-    } catch (e) {
-      if (e == QUOTA_EXCEEDED_ERR) alert('Out of storage!');
-    }
-  }
-
-  storageEventHandler(event) {
-    alert('Storage has been changed on another page');
-    this.getStickiesFromStorage();
-    this.toHTML();
+    this._milestones.sort((a, b) => new Date(a.date) - new Date(b.date));
+    this._storage.setItem('milestones', JSON.stringify(this._milestones));
   }
 }
 
 function init() {
-  const milestonesComponent = new MilestonesComponent(this);
+  const milestonesComponent = new MilestonesComponent(this.localStorage);
   const addButton = document.getElementById('add');
   const clearButton = document.getElementById('clear');
   const nameText = document.getElementById('name');
@@ -123,21 +98,19 @@ function init() {
     alert('no storage available. ');
     addButton.disabled = true;
     clearButton.disabled = true;
+    return;
   }
 
+  milestonesComponent.getMilestonesFromStorage();
+  milestonesComponent.toHTML();
+
   addButton.onclick = () => {
-    milestonesComponent.addMilestone(
-      nameText.value,
-      dateText.value
-    );
+    milestonesComponent.addMilestone(nameText.value, dateText.value);
     nameText.value = '';
   };
 
   clearButton.onclick = () => {
     milestonesComponent.clearMilestones();
   };
-  
 }
-
 window.onload = init;
-};
