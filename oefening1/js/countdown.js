@@ -33,7 +33,7 @@ class MilestonesComponent {
     return Math.ceil(Math.abs((new Date().getTime() - new Date(d).getTime()) / oneDay));
   }
   addMilestone(name, date) {
-    if (name === '' || name === '' || date === '' || date === null) alert("Name/Date milestone required");
+    if (name === '' || name === null || date === null) alert("Name/Date milestone required");
     else if (new Date(date) < new Date()) alert("This milestone is today or already in the past and isn't added");
     else {
       this._milestones.push(new Milestone(name, date));
